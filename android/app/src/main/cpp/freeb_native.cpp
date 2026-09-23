@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <cstdio>
 #include <vulkan/vulkan.h>
 
 extern "C" JNIEXPORT jboolean JNICALL

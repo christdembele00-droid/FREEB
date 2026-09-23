@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     cloudinary_api_key: str = ""
     cloudinary_api_secret: str = ""
     allowed_origins: str = "http://localhost"
+    auto_create_db: bool = False
+    max_upload_bytes: int = 100 * 1024 * 1024
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

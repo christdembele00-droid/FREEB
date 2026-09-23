@@ -70,3 +70,4 @@ class FreebApi(
 
         client.newCall(request).execute().use { }
     }
+}

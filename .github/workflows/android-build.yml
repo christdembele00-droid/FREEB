@@ -1,4 +1,8 @@
 name: FREEB Android Build
+concurrency:
+  group: freeb-android-build.yml
+  cancel-in-progress: true
+
 
 on:
   workflow_dispatch:

@@ -30,6 +30,9 @@ async def health():
 
 @router.get("/health/ready")
 async def readiness():
-    async with SessionLocal() as db:
-        await db.execute(text("SELECT 1"))
-    return {"status": "ready", "database": "ok"}
+    try:
+        async with SessionLocal() as db:
+            await db.execute(text("SELECT 1"))
+    except Exception:
+        return {"status": "degraded", "database": "unavailable", "service": "up"}
+    return {"status": "ready", "database": "ok", "service": "up"}

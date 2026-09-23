@@ -8,7 +8,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.freeb.app.BuildConfig
 import com.freeb.app.MainActivity
-import com.freeb.app.R
 import com.freeb.app.network.FreebApi
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -59,7 +58,7 @@ class FreebMessagingService : FirebaseMessagingService() {
         manager.notify(
             (message.data["call_id"] ?: message.data["conversation_id"] ?: body).hashCode(),
             NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)

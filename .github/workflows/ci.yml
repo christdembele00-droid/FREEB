@@ -1,4 +1,8 @@
 name: FREEB CI
+concurrency:
+  group: freeb-ci.yml
+  cancel-in-progress: true
+
 
 on:
   push:

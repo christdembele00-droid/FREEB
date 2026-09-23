@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.StarBorder
@@ -539,7 +540,7 @@ private fun ProfileGrid() {
                         Modifier.weight(1f).aspectRatio(1f).background(
                             Brush.linearGradient(listOf(
                                 Color(0xFF101010),
-                                Color(0xFF262626 + ((it + cell) % 4) * 0x030303),
+                                Color(0xFF262626),
                                 Color(0xFF080808)
                             ))
                         )

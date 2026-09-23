@@ -4,8 +4,9 @@ import {
   GoogleAuthProvider,
   User,
   getAuth,
+  getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from "firebase/auth";
 import { initializeApp, getApps } from "firebase/app";
@@ -97,7 +98,14 @@ function App(){
 
   const readyLabel=useMemo(()=>health?.status==="ok" ? "API opérationnelle" : health ? "API à vérifier" : "Connexion API...",[health]);
 
-  useEffect(()=>{if(!auth)return;return onAuthStateChanged(auth,setUser);},[]);
+  useEffect(()=>{
+    if(!auth)return;
+    let active=true;
+    void getRedirectResult(auth).catch(error=>{
+      if(active)setStatus(error instanceof Error ? error.message : "Connexion Google échouée");
+    });
+    return onAuthStateChanged(auth,setUser);
+  },[]);
   useEffect(()=>{
     fetch(API_URL+"/v1/health/ready").then(response=>response.json()).then(data=>setHealth(data)).catch(error=>setHealth({status:String(error)}));
   },[]);
@@ -144,7 +152,12 @@ function App(){
 
   async function login(){
     if(!auth)return;
-    try{await signInWithPopup(auth,googleProvider);}catch(error){setStatus(error instanceof Error?error.message:"Connexion Google échouée");}
+    try{
+      setStatus("Redirection vers Google…");
+      await signInWithRedirect(auth,googleProvider);
+    }catch(error){
+      setStatus(error instanceof Error?error.message:"Connexion Google échouée");
+    }
   }
 
   if(!firebaseReady || !auth){

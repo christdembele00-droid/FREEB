@@ -51,6 +51,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("androidx.datastore:datastore-preferences:1.2.0")
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    implementation("io.github.webrtc-sdk:android:150.7871.01")
 
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-auth")

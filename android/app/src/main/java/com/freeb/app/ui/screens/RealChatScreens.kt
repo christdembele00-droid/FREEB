@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -45,8 +46,8 @@ import com.freeb.app.chat.SearchUserUi
 import com.freeb.app.network.FreebApi
 import java.util.concurrent.Executors
 
-private val ChatPanel = Color(0xFF151515)
-private val ChatAccent = Color(0xFFFFD54A)
+private val ChatPanel = Color(0xFF111720)
+private val ChatAccent = Color(0xFF67E8F9)
 
 @Composable
 fun RealChatListScreen(
@@ -86,16 +87,16 @@ fun RealChatListScreen(
         onDispose { executor.shutdownNow() }
     }
 
-    Box(Modifier.fillMaxSize().background(Color.Black)) {
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize()) {
             Row(
                 Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Messages", color = Color.White)
+                Text("Messages", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineSmall)
                 IconButton(onClick = onSearch) {
-                    Icon(Icons.Filled.Search, null, tint = Color.White)
+                    Icon(Icons.Filled.Search, null, tint = MaterialTheme.colorScheme.onBackground)
                 }
             }
             LazyColumn(

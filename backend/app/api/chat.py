@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
 from app.db.models import Conversation, ConversationMember, Message, User
 from app.db.session import get_db
+from app.db.models import Device
 from app.websocket.manager import manager
+from app.services.push import send_push
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -63,6 +65,12 @@ async def send_message(
     db.add(message)
     await db.commit()
     await db.refresh(message)
+
+    recipient_result = await db.execute(
+        select(Device.token).join(ConversationMember, ConversationMember.user_id == Device.user_id)
+        .where(ConversationMember.conversation_id == conversation_id, Device.active.is_(True), Device.user_id != user.id)
+    )
+    send_push([token for token in recipient_result.scalars()], "FREEB", "Nouveau message", {"conversation_id": conversation_id})
 
     await manager.broadcast(
         conversation_id,

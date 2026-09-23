@@ -1,0 +1,35 @@
+# Android / Gradle
+.gradle/
+build/
+*/build/
+local.properties
+*.iml
+
+# IDE
+.idea/
+*.swp
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+google-services.json
+service-account*.json
+firebase-adminsdk-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# Native
+.cxx/
+.externalNativeBuild/
+
+# Generated
+out/
+dist/
+coverage/

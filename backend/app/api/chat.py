@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, desc, or_, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
@@ -40,7 +40,7 @@ async def create_conversation(
             )
             .group_by(Conversation.id)
             .having(
-                __import__("sqlalchemy").func.count(ConversationMember.user_id) == 2
+                func.count(ConversationMember.user_id) == 2
             )
             .limit(1)
         )

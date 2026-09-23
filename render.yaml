@@ -11,6 +11,8 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+      - key: FREEB_DB_SCHEMA
+        value: freeb
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_CLIENT_EMAIL

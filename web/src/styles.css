@@ -1,0 +1,46 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f8fafc;
+  background: #050505;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at top, #151515, #050505 45%); }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0 24px; }
+.topbar strong { display:block; margin-top:5px; font-size:20px; }
+.top-actions { display:flex; align-items:center; gap:10px; }
+.card { border:1px solid #262626; background:rgba(10,10,10,.88); border-radius:24px; box-shadow:0 24px 80px rgba(0,0,0,.3); }
+.hero { padding:72px; max-width:920px; margin:70px auto; }
+.hero h1 { font-size:clamp(46px,8vw,92px); line-height:.95; margin:16px 0 22px; max-width:850px; }
+.hero p { color:#a1a1aa; max-width:720px; font-size:18px; line-height:1.6; }
+.eyebrow { font-size:11px; font-weight:800; letter-spacing:.18em; color:#9ca3af; text-transform:uppercase; }
+.notice { margin:28px 0; padding:16px; border:1px solid #333; border-radius:14px; color:#d4d4d8; line-height:1.5; }
+.grid { display:grid; grid-template-columns:280px minmax(0,1fr) 320px; gap:16px; align-items:stretch; }
+.sidebar,.account,.chat { padding:20px; min-height:650px; }
+.profile { display:flex; gap:12px; align-items:center; padding-bottom:18px; border-bottom:1px solid #262626; }
+.profile img { width:48px; height:48px; border-radius:50%; object-fit:cover; }
+.profile span { display:block; margin-top:4px; color:#8d8d95; font-size:12px; overflow:hidden; text-overflow:ellipsis; }
+button { border:1px solid #2e2e2e; color:#f8fafc; background:#101010; border-radius:12px; padding:11px 14px; }
+button:hover { border-color:#555; }
+.primary { background:#f8fafc; color:#080808; border-color:#f8fafc; font-weight:800; }
+.ghost { width:100%; margin:18px 0 10px; background:transparent; }
+.pill { display:inline-flex; align-items:center; padding:7px 10px; border:1px solid #2a2a2a; border-radius:999px; font-size:11px; color:#a1a1aa; }
+.pill.online { color:#e2fbe7; border-color:#32563a; background:#0a180d; }
+.conversation { display:flex; justify-content:space-between; width:100%; margin:6px 0; text-align:left; }
+.conversation span { font-weight:700; }
+.conversation small { color:#666; }
+.conversation.active { border-color:#fff; }
+.chat { display:flex; flex-direction:column; }
+.chat-head { display:flex; justify-content:space-between; gap:10px; padding-bottom:16px; border-bottom:1px solid #262626; }
+.chat-head h2 { margin:7px 0 0; font-size:20px; overflow:hidden; text-overflow:ellipsis; }
+.messages { flex:1; overflow:auto; padding:16px 0; }
+.message { margin-bottom:10px; padding:12px; border:1px solid #222; border-radius:14px; background:#0d0d0d; }
+.message pre,.account pre { margin:0; white-space:pre-wrap; word-break:break-word; color:#c7c7ce; font:12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.composer { display:flex; gap:10px; padding-top:16px; border-top:1px solid #262626; }
+.composer input { min-width:0; flex:1; padding:13px 14px; border-radius:12px; border:1px solid #2d2d2d; background:#080808; color:#fff; outline:none; }
+.muted { color:#73737b; }
+@media(max-width:1100px){.grid{grid-template-columns:240px minmax(0,1fr)}.account{grid-column:1/-1;min-height:280px}}
+@media(max-width:760px){.shell{padding:14px}.topbar{align-items:flex-start;flex-direction:column}.top-actions{width:100%;flex-wrap:wrap}.hero{padding:36px 24px;margin:25px auto}.grid{grid-template-columns:1fr}.sidebar,.chat,.account{min-height:auto}.messages{min-height:260px;max-height:55vh}}

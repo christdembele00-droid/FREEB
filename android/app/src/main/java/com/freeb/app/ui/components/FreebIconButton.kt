@@ -9,7 +9,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -20,18 +19,19 @@ fun FreebIconButton(
     size: Dp,
     onClick: () -> Unit,
     selected: Boolean = false,
-    filled: Boolean = false
+    filled: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        Modifier
+        modifier
             .size(size)
-            .clip(CircleShape)
             .background(
                 when {
                     filled -> Color.White
                     selected -> Color.White.copy(alpha = 0.16f)
                     else -> Color.Black.copy(alpha = 0.42f)
-                }
+                },
+                CircleShape
             )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center

@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: freeb
+      POSTGRES_USER: freeb
+      POSTGRES_PASSWORD: freeb
+    ports:
+      - "5432:5432"
+    volumes:
+      - freeb_postgres:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://freeb:freeb@postgres:5432/freeb
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  freeb_postgres:

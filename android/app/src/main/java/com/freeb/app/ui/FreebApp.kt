@@ -62,6 +62,13 @@ fun FreebApp(
                 runCatching {
                     val me = api.me()
                     val backendId = me.getString("id")
+                    val pending = api.incomingCalls().optJSONObject(0)
+                    if (pending != null) {
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            incomingCallId = pending.optString("call_id").ifBlank { null }
+                            incomingVideo = pending.optString("kind").equals("VIDEO", true)
+                        }
+                    }
                     socket.connect(backendId) { event, payload ->
                         if (event == "CALL_INCOMING") {
                             incomingCallId = payload.optString("call_id").ifBlank { null }

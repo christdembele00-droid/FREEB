@@ -362,7 +362,7 @@ private fun ResponsivePage(content: @Composable androidx.compose.foundation.layo
 }
 
 @Composable
-private fun HomeScaffold(content: @Composable (Float) -> Unit) {
+private fun HomeScaffold(content: @Composable androidx.compose.foundation.layout.BoxScope.(Float) -> Unit) {
     ResponsivePage(content)
 }
 

@@ -1,16 +1,25 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
-from app.auth.firebase_auth import verify_id_token
+from app.auth.firebase_auth import (
+    extract_websocket_token,
+    origin_allowed,
+    verify_id_token,
+)
 from app.db.models import ConversationMember, User
 from app.db.session import SessionLocal
 from app.websocket.manager import manager
 
 router = APIRouter(tags=["websocket"])
 
+
 @router.websocket("/ws/{conversation_id}")
 async def websocket_endpoint(websocket: WebSocket, conversation_id: str):
-    token = websocket.query_params.get("token")
+    if not origin_allowed(websocket.headers.get("origin")):
+        await websocket.close(code=4403)
+        return
+
+    token = extract_websocket_token(websocket)
     if not token:
         await websocket.close(code=4401)
         return
@@ -23,7 +32,9 @@ async def websocket_endpoint(websocket: WebSocket, conversation_id: str):
 
     firebase_uid = str(decoded["uid"])
     async with SessionLocal() as db:
-        user_result = await db.execute(select(User).where(User.firebase_uid == firebase_uid))
+        user_result = await db.execute(
+            select(User).where(User.firebase_uid == firebase_uid)
+        )
         user = user_result.scalar_one_or_none()
         if not user:
             await websocket.close(code=4403)
@@ -43,6 +54,7 @@ async def websocket_endpoint(websocket: WebSocket, conversation_id: str):
             payload = await websocket.receive_json()
             if not isinstance(payload, dict):
                 continue
+
             event = payload.get("event")
             if event in {"TYPING_START", "TYPING_STOP", "MESSAGE_READ"}:
                 await manager.broadcast(

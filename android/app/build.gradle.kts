@@ -18,7 +18,19 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "FREEB_API_URL", "\"${providers.gradleProperty("freebApiUrl").orNull ?: "http://10.0.2.2:8080"}\"")
+
+        val apiUrl = providers.gradleProperty("freebApiUrl").orNull
+            ?: "http://10.0.2.2:8080"
+        val firebaseApiKey = providers.gradleProperty("firebaseApiKey").orNull ?: ""
+        val firebaseAppId = providers.gradleProperty("firebaseAppId").orNull ?: ""
+        val firebaseProjectId = providers.gradleProperty("firebaseProjectId").orNull ?: ""
+        val firebaseSenderId = providers.gradleProperty("firebaseSenderId").orNull ?: ""
+
+        buildConfigField("String", "FREEB_API_URL", ""$apiUrl"")
+        buildConfigField("String", "FIREBASE_API_KEY", ""$firebaseApiKey"")
+        buildConfigField("String", "FIREBASE_APP_ID", ""$firebaseAppId"")
+        buildConfigField("String", "FIREBASE_PROJECT_ID", ""$firebaseProjectId"")
+        buildConfigField("String", "FIREBASE_SENDER_ID", ""$firebaseSenderId"")
     }
 
     externalNativeBuild {

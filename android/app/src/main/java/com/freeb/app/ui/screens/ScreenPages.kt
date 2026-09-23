@@ -354,7 +354,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
 }
 
 @Composable
-private fun ResponsivePage(content: @Composable (Float) -> Unit) {
+private fun ResponsivePage(content: @Composable androidx.compose.foundation.layout.BoxScope.(Float) -> Unit) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
         val scale = Adaptive.uiScale(maxWidth, maxHeight)
         content(scale)

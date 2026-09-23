@@ -8,17 +8,18 @@ android {
     namespace = "com.freeb.app"
     compileSdk = 36
 
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.freeb.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-    }
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
+        buildConfigField("String", "FREEB_API_URL", "\"http://10.0.2.2:8080\"")
     }
 
     externalNativeBuild {
@@ -49,7 +50,8 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.11.1")
 
     implementation("androidx.work:work-runtime-ktx:2.11.2")
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
 
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-auth")

@@ -1,8 +1,8 @@
 name: FREEB Android Build
-concurrency:
-  group: freeb-android-build.yml
-  cancel-in-progress: true
 
+concurrency:
+  group: freeb-android-build
+  cancel-in-progress: true
 
 on:
   workflow_dispatch:
@@ -14,16 +14,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.6.0"
-      - run: gradle :android:app:assembleDebug --stacktrace
+
+      - name: Build FREEB APK
+        env:
+          FREEB_API_URL: ${{ vars.FREEB_API_URL }}
+          FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
+          FIREBASE_APP_ID: ${{ vars.FIREBASE_APP_ID }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          FIREBASE_SENDER_ID: ${{ vars.FIREBASE_SENDER_ID }}
+        run: |
+          args=()
+          if [ -n "$FREEB_API_URL" ]; then args+=("-PfreebApiUrl=$FREEB_API_URL"); fi
+          if [ -n "$FIREBASE_API_KEY" ]; then args+=("-PfirebaseApiKey=$FIREBASE_API_KEY"); fi
+          if [ -n "$FIREBASE_APP_ID" ]; then args+=("-PfirebaseAppId=$FIREBASE_APP_ID"); fi
+          if [ -n "$FIREBASE_PROJECT_ID" ]; then args+=("-PfirebaseProjectId=$FIREBASE_PROJECT_ID"); fi
+          if [ -n "$FIREBASE_SENDER_ID" ]; then args+=("-PfirebaseSenderId=$FIREBASE_SENDER_ID"); fi
+          gradle :android:app:assembleDebug --stacktrace "${args[@]}"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FREEB-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

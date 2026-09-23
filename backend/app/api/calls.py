@@ -46,7 +46,7 @@ async def create_call(
     send_push(list(device_result.scalars()), "FREEB", "Incoming call", {"call_id": call.id, "kind": kind})
 
     await manager.broadcast(
-        f"call:{callee.id}",
+        f"user:{callee.id}",
         {
             "event": "CALL_INCOMING",
             "payload": {
@@ -95,5 +95,23 @@ async def hangup_call(
     await manager.broadcast(
         f"call:{call.id}",
         {"event": "CALL_ENDED", "payload": {"call_id": call.id, "user_id": user.id}},
+    )
+    return {"ok": True}
+
+
+@router.post("/{call_id}/reject")
+async def reject_call(
+    call_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    call = await db.get(CallSession, call_id)
+    if not call or user.id not in {call.caller_id, call.callee_id}:
+        raise HTTPException(404, "Call not found")
+    call.status = "REJECTED"
+    await db.commit()
+    await manager.broadcast(
+        f"call:{call.id}",
+        {"event": "CALL_REJECTED", "payload": {"call_id": call.id, "user_id": user.id}},
     )
     return {"ok": True}

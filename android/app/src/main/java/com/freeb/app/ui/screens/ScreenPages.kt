@@ -557,7 +557,10 @@ private fun MessageBubble(index: Int) {
         horizontalArrangement = if (index % 3 == 0) Arrangement.End else Arrangement.Start
     ) {
         Box(
-            Modifier.size(width = if (index % 2 == 0) 172.dp else 122.dp, height = if (index % 3 == 0) 58.dp else 46.dp))
+            Modifier.size(
+                width = if (index % 2 == 0) 172.dp else 122.dp,
+                height = if (index % 3 == 0) 58.dp else 46.dp
+            )
                 .clip(RoundedCornerShape(20.dp))
                 .background(if (index % 3 == 0) Color.White else Panel)
                 .padding(12.dp),

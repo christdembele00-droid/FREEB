@@ -104,6 +104,8 @@ class FreebApi(
             )
         )
 
+    fun incomingCalls(): JSONArray = JSONArray(request("/v1/calls/incoming"))
+
     fun answerCall(callId: String): JSONObject =
         JSONObject(request("/v1/calls/" + callId + "/answer", "POST", "{}"))
 

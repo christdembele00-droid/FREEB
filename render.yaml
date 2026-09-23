@@ -31,3 +31,27 @@ services:
         value: "false"
       - key: MAX_UPLOAD_BYTES
         value: "104857600"
+
+  - type: web
+    name: freeb-web
+    runtime: static
+    plan: free
+    region: frankfurt
+    buildCommand: cd web && npm install && npm run build
+    staticPublishPath: web/dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_FREEB_API_URL
+        value: https://freeb-api.onrender.com
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false

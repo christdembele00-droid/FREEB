@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.call_ws import router as call_ws_router
+from app.api.calls import router as calls_router
 from app.api.chat import router as chat_router
 from app.api.devices import router as devices_router
 from app.api.health import router as health_router
@@ -25,6 +27,8 @@ app.include_router(devices_router, prefix="/v1")
 app.include_router(media_router, prefix="/v1")
 app.include_router(stories_router, prefix="/v1")
 app.include_router(chat_router, prefix="/v1")
+app.include_router(calls_router, prefix="/v1")
+app.include_router(call_ws_router, prefix="/v1")
 app.include_router(ws_router, prefix="/v1")
 
 @app.get("/")

@@ -1,5 +1,3 @@
-import os
-
 import firebase_admin
 from firebase_admin import auth, credentials
 
@@ -22,7 +20,7 @@ def initialize_firebase() -> None:
         return
 
     # Local development can use Application Default Credentials.
-    # Production Koyeb deployments should use the explicit FIREBASE_* variables.
+    # Production Render deployments should use explicit FIREBASE_* variables.
     firebase_admin.initialize_app(credentials.ApplicationDefault())
 
 

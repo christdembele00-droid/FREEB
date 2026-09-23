@@ -144,3 +144,18 @@ class SnapRecipient(Base):
     opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     replayed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), default="DELIVERED")
+
+class StoryView(Base):
+    __tablename__ = "story_views"
+
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), primary_key=True)
+    viewer_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    viewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+class StoryReaction(Base):
+    __tablename__ = "story_reactions"
+
+    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), primary_key=True)
+    reactor_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    reaction: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

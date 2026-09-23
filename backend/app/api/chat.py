@@ -3,9 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
-from app.db.models import Conversation, ConversationMember, Message, User
+from app.db.models import Conversation, ConversationMember, Device, Message, User
 from app.db.session import get_db
-from app.db.models import Device
 from app.websocket.manager import manager
 from app.services.push import send_push
 
@@ -60,6 +59,8 @@ async def send_message(
     body = str(payload.get("body", "")).strip()
     if not body:
         raise HTTPException(400, "Empty message")
+    if len(body) > 4000:
+        raise HTTPException(413, "Message too long")
 
     message = Message(conversation_id=conversation_id, sender_id=user.id, body=body)
     db.add(message)

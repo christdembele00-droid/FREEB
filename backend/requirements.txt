@@ -7,4 +7,5 @@ alembic
 firebase-admin
 cloudinary
 httpx
+python-multipart
 pytest

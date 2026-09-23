@@ -10,6 +10,7 @@ import okhttp3.WebSocketListener
 import org.json.JSONObject
 import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
+import java.util.concurrent.CopyOnWriteArrayList
 
 class CallSignalingClient(
     private val baseUrl: String,
@@ -17,9 +18,12 @@ class CallSignalingClient(
     private val http: OkHttpClient = OkHttpClient()
 ) {
     private var socket: WebSocket? = null
+    private var connected = false
+    private val pending = CopyOnWriteArrayList<String>()
 
     fun connect(
         callId: String,
+        onConnected: () -> Unit = {},
         onEvent: (String, JSONObject) -> Unit,
         onClosed: () -> Unit = {}
     ) {
@@ -37,6 +41,13 @@ class CallSignalingClient(
                 .url("$wsBase/v1/ws/calls/$callId?token=$token")
                 .build(),
             object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    connected = true
+                    pending.forEach(webSocket::send)
+                    pending.clear()
+                    onConnected()
+                }
+
                 override fun onMessage(webSocket: WebSocket, text: String) {
                     runCatching {
                         val json = JSONObject(text)
@@ -45,10 +56,12 @@ class CallSignalingClient(
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    connected = false
                     onClosed()
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    connected = false
                     onClosed()
                 }
             }
@@ -77,9 +90,16 @@ class CallSignalingClient(
         send("CALL_ENDED", JSONObject())
         socket?.close(1000, "hangup")
         socket = null
+        connected = false
+        pending.clear()
     }
 
     private fun send(event: String, payload: JSONObject) {
-        socket?.send(JSONObject().put("event", event).put("payload", payload).toString())
+        val message = JSONObject().put("event", event).put("payload", payload).toString()
+        if (connected) {
+            socket?.send(message)
+        } else {
+            pending.add(message)
+        }
     }
 }

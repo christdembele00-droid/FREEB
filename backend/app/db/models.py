@@ -28,7 +28,7 @@ class MediaAsset(Base):
     __tablename__ = "media_assets"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     public_id: Mapped[str] = mapped_column(String(512), unique=True)
     secure_url: Mapped[str] = mapped_column(Text)
     resource_type: Mapped[str] = mapped_column(String(32))
@@ -43,8 +43,8 @@ class Story(Base):
     __tablename__ = "stories"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    media_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
+    media_asset_id: Mapped[str] = mapped_column(ForeignKey("freeb.media_assets.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     is_private: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -53,7 +53,7 @@ class Device(Base):
     __tablename__ = "devices"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     token: Mapped[str] = mapped_column(Text, unique=True, index=True)
     platform: Mapped[str] = mapped_column(String(16), default="android")
     active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -68,15 +68,15 @@ class Conversation(Base):
 class ConversationMember(Base):
     __tablename__ = "conversation_members"
 
-    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), primary_key=True)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("freeb.conversations.id"), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
 
 class Message(Base):
     __tablename__ = "messages"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), index=True)
-    sender_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("freeb.conversations.id"), index=True)
+    sender_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
 
@@ -84,8 +84,8 @@ class CallSession(Base):
     __tablename__ = "call_sessions"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    caller_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    callee_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    caller_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
+    callee_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     kind: Mapped[str] = mapped_column(String(16), default="VIDEO")
     status: Mapped[str] = mapped_column(String(16), default="RINGING")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
@@ -95,8 +95,8 @@ class FriendRequest(Base):
     __tablename__ = "friend_requests"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    requester_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    receiver_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    requester_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
+    receiver_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     status: Mapped[str] = mapped_column(String(16), default="PENDING")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -104,22 +104,22 @@ class FriendRequest(Base):
 class Friendship(Base):
     __tablename__ = "friendships"
 
-    user_a: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    user_b: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    user_a: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
+    user_b: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
 class Block(Base):
     __tablename__ = "blocks"
 
-    blocker_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    blocked_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    blocker_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
+    blocked_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
 class Report(Base):
     __tablename__ = "reports"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    reporter_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    reporter_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
     target_type: Mapped[str] = mapped_column(String(32))
     target_id: Mapped[str] = mapped_column(String(36), index=True)
     reason: Mapped[str] = mapped_column(String(64))
@@ -131,16 +131,16 @@ class Snap(Base):
     __tablename__ = "snaps"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    sender_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    media_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"))
+    sender_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), index=True)
+    media_asset_id: Mapped[str] = mapped_column(ForeignKey("freeb.media_assets.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
 
 class SnapRecipient(Base):
     __tablename__ = "snap_recipients"
 
-    snap_id: Mapped[str] = mapped_column(ForeignKey("snaps.id"), primary_key=True)
-    recipient_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    snap_id: Mapped[str] = mapped_column(ForeignKey("freeb.snaps.id"), primary_key=True)
+    recipient_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
     opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     replayed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), default="DELIVERED")
@@ -148,14 +148,14 @@ class SnapRecipient(Base):
 class StoryView(Base):
     __tablename__ = "story_views"
 
-    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), primary_key=True)
-    viewer_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    story_id: Mapped[str] = mapped_column(ForeignKey("freeb.stories.id"), primary_key=True)
+    viewer_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
     viewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
 class StoryReaction(Base):
     __tablename__ = "story_reactions"
 
-    story_id: Mapped[str] = mapped_column(ForeignKey("stories.id"), primary_key=True)
-    reactor_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    story_id: Mapped[str] = mapped_column(ForeignKey("freeb.stories.id"), primary_key=True)
+    reactor_id: Mapped[str] = mapped_column(ForeignKey("freeb.users.id"), primary_key=True)
     reaction: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

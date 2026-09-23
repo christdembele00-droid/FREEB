@@ -2,6 +2,7 @@ package com.freeb.app.ui
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.min
 
 object Adaptive {
     fun uiScale(width: Dp, height: Dp): Float {

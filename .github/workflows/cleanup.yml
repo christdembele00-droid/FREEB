@@ -1,4 +1,8 @@
 name: FREEB Expiration Cleanup
+concurrency:
+  group: freeb-cleanup.yml
+  cancel-in-progress: true
+
 
 on:
   schedule:

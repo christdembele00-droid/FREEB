@@ -1,5 +1,8 @@
+import time
+
 import cloudinary
 import cloudinary.utils
+
 
 def configure_cloudinary(cloud_name: str, api_key: str, api_secret: str) -> None:
     cloudinary.config(
@@ -9,9 +12,11 @@ def configure_cloudinary(cloud_name: str, api_key: str, api_secret: str) -> None
         secure=True,
     )
 
+
 def signed_upload_parameters(folder: str) -> dict:
-    params = {"folder": folder}
-    signature, timestamp = cloudinary.utils.api_sign_request(
+    timestamp = int(time.time())
+    params = {"folder": folder, "timestamp": timestamp}
+    signature = cloudinary.utils.api_sign_request(
         params, cloudinary.config().api_secret
-    ), None
-    return {"params": params, "signature": signature, "timestamp": timestamp}
+    )
+    return {"params": params, "signature": signature}

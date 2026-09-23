@@ -1,16 +1,25 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
-from app.auth.firebase_auth import verify_id_token
+from app.auth.firebase_auth import (
+    extract_websocket_token,
+    origin_allowed,
+    verify_id_token,
+)
 from app.db.models import CallSession, User
 from app.db.session import SessionLocal
 from app.websocket.manager import manager
 
 router = APIRouter(tags=["call-signaling"])
 
+
 @router.websocket("/ws/calls/{call_id}")
 async def call_signaling(websocket: WebSocket, call_id: str):
-    token = websocket.query_params.get("token")
+    if not origin_allowed(websocket.headers.get("origin")):
+        await websocket.close(code=4403)
+        return
+
+    token = extract_websocket_token(websocket)
     if not token:
         await websocket.close(code=4401)
         return

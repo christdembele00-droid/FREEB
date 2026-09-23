@@ -8,6 +8,8 @@ from app.auth.dependencies import get_current_user
 from app.db.models import CallSession, User, utc_now
 from app.db.session import get_db
 from app.websocket.manager import manager
+from app.db.models import Device
+from app.services.push import send_push
 
 router = APIRouter(prefix="/calls", tags=["calls"])
 
@@ -39,6 +41,9 @@ async def create_call(
     db.add(call)
     await db.commit()
     await db.refresh(call)
+
+    device_result = await db.execute(select(Device.token).where(Device.user_id == callee.id, Device.active.is_(True)))
+    send_push(list(device_result.scalars()), "FREEB", "Incoming call", {"call_id": call.id, "kind": kind})
 
     await manager.broadcast(
         f"call:{callee.id}",

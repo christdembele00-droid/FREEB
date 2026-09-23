@@ -20,7 +20,7 @@ android {
         versionName = "0.1.0"
 
         val apiUrl = providers.gradleProperty("freebApiUrl").orNull
-            ?: "http://10.0.2.2:8080"
+            ?: "https://freeb-api.onrender.com"
         val firebaseApiKey = providers.gradleProperty("firebaseApiKey").orNull ?: ""
         val firebaseAppId = providers.gradleProperty("firebaseAppId").orNull ?: ""
         val firebaseProjectId = providers.gradleProperty("firebaseProjectId").orNull ?: ""

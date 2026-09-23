@@ -79,3 +79,14 @@ class Message(Base):
     sender_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+
+class CallSession(Base):
+    __tablename__ = "call_sessions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    caller_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    callee_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(16), default="VIDEO")
+    status: Mapped[str] = mapped_column(String(16), default="RINGING")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)

@@ -90,3 +90,39 @@ class CallSession(Base):
     status: Mapped[str] = mapped_column(String(16), default="RINGING")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+class FriendRequest(Base):
+    __tablename__ = "friend_requests"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    requester_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    receiver_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="PENDING")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+class Friendship(Base):
+    __tablename__ = "friendships"
+
+    user_a: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    user_b: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+class Block(Base):
+    __tablename__ = "blocks"
+
+    blocker_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    blocked_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+class Report(Base):
+    __tablename__ = "reports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    reporter_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    target_type: Mapped[str] = mapped_column(String(32))
+    target_id: Mapped[str] = mapped_column(String(36), index=True)
+    reason: Mapped[str] = mapped_column(String(64))
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), default="OPEN")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

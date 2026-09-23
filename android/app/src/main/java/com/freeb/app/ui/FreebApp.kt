@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.freeb.app.ui.components.FreebBottomBar
 import com.freeb.app.ui.screens.CameraScreen
 import com.freeb.app.ui.screens.ChatDetailScreen
 import com.freeb.app.ui.screens.ChatListScreen
@@ -22,7 +24,6 @@ import com.freeb.app.ui.screens.Screen
 import com.freeb.app.ui.screens.SettingsScreen
 import com.freeb.app.ui.screens.StoriesListScreen
 import com.freeb.app.ui.screens.StoryViewerScreen
-import com.freeb.app.ui.components.FreebBottomBar
 
 private enum class OverlayPage { NONE, CHAT_DETAIL, STORY_VIEWER, MEDIA_EDITOR, SETTINGS }
 
@@ -34,8 +35,10 @@ fun FreebApp(
     var selectedIndex by remember { mutableIntStateOf(2) }
     var overlay by remember { mutableStateOf(OverlayPage.NONE) }
 
-    if (overlay != OverlayPage.NONE) {
-        Box(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val scale = Adaptive.uiScale(maxWidth, maxHeight)
+
+        if (overlay != OverlayPage.NONE) {
             when (overlay) {
                 OverlayPage.CHAT_DETAIL -> ChatDetailScreen { overlay = OverlayPage.NONE }
                 OverlayPage.STORY_VIEWER -> StoryViewerScreen { overlay = OverlayPage.NONE }
@@ -43,13 +46,11 @@ fun FreebApp(
                 OverlayPage.SETTINGS -> SettingsScreen { overlay = OverlayPage.NONE }
                 OverlayPage.NONE -> Unit
             }
+            return@BoxWithConstraints
         }
-        return
-    }
 
-    val screen = Screen.fromIndex(selectedIndex)
+        val screen = Screen.fromIndex(selectedIndex)
 
-    Box(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = screen,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -70,11 +71,8 @@ fun FreebApp(
 
         FreebBottomBar(
             selectedIndex = selectedIndex,
-            onSelect = {
-                overlay = OverlayPage.NONE
-                selectedIndex = it
-            },
-            scale = 1f
+            onSelect = { selectedIndex = it },
+            scale = scale
         )
     }
 }

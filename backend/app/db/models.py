@@ -126,3 +126,21 @@ class Report(Base):
     description: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(16), default="OPEN")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+class Snap(Base):
+    __tablename__ = "snaps"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    sender_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    media_asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+class SnapRecipient(Base):
+    __tablename__ = "snap_recipients"
+
+    snap_id: Mapped[str] = mapped_column(ForeignKey("snaps.id"), primary_key=True)
+    recipient_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    replayed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(16), default="DELIVERED")

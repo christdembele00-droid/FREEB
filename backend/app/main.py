@@ -16,6 +16,7 @@ from app.api.stories import router as stories_router
 from app.api.search import router as search_router
 from app.api.users import router as users_router
 from app.api.ws import router as ws_router
+from app.api.user_events_ws import router as user_events_router
 from app.core.config import settings
 from app.db.init_db import init_db
 
@@ -40,6 +41,7 @@ app.include_router(moderation_router, prefix="/v1")
 app.include_router(snaps_router, prefix="/v1")
 app.include_router(story_interactions_router, prefix="/v1")
 app.include_router(ws_router, prefix="/v1")
+app.include_router(user_events_router, prefix="/v1")
 
 @app.get("/")
 async def root():

@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.call_ws import router as call_ws_router
 from app.api.friends import router as friends_router
@@ -20,13 +21,24 @@ from app.api.user_events_ws import router as user_events_router
 from app.core.config import settings
 from app.db.init_db import init_db
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if settings.auto_create_db:
         await init_db()
     yield
 
-app = FastAPI(title="FREEB API", version="0.3.0", lifespan=lifespan)
+
+app = FastAPI(title="FREEB API", version="0.4.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(health_router, prefix="/v1")
 app.include_router(users_router, prefix="/v1")
 app.include_router(devices_router, prefix="/v1")
@@ -43,6 +55,13 @@ app.include_router(story_interactions_router, prefix="/v1")
 app.include_router(ws_router, prefix="/v1")
 app.include_router(user_events_router, prefix="/v1")
 
+
 @app.get("/")
 async def root():
-    return {"service": "FREEB API", "status": "ok", "version": app.version}
+    return {
+        "service": "FREEB API",
+        "status": "ok",
+        "version": app.version,
+        "websocket": "/v1/ws/{conversation_id}",
+        "calls_websocket": "/v1/ws/calls/{call_id}",
+    }

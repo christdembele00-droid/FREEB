@@ -1,10 +1,12 @@
 # FREEB on Koyeb
 
-FREEB is a monorepo. The backend is in `backend/` and already contains a Dockerfile.
+FREEB is a monorepo. The backend lives in `backend/` and is deployable as a Dockerfile Web Service.
 
-## Koyeb service
+Koyeb supports GitHub deployments, Dockerfile builds, monorepo work directories, runtime environment variables, custom HTTP health checks, and WebSocket connections. The current Koyeb Free Instance is a single 512 MB / 0.1 vCPU / 2 GB SSD Web Service and scales to zero after one hour without traffic. 
 
-Create a **Web Service** from GitHub:
+## Service
+
+Create a Koyeb Web Service from GitHub:
 
 - Repository: `christdembele00-droid/FREEB`
 - Branch: `main`
@@ -12,43 +14,60 @@ Create a **Web Service** from GitHub:
 - Work directory: `backend`
 - Dockerfile: `Dockerfile`
 - Exposed port: `8080`
-- Protocol: HTTP
+- Protocol: **HTTP**
 - Route: `/`
-- Health check: `/`
-- Service name: `freeb-api`
+- Health check: **HTTP GET `/v1/health/ready` on port 8080**
 
-Koyeb supports GitHub repositories and Dockerfile-based builds, including monorepos with a configurable work directory. See the official deployment documentation:
-https://www.koyeb.com/docs/build-and-deploy/deploy-with-git
+Koyeb's monorepo behavior means the configured work directory becomes the build environment, so `backend/requirements.txt` and `backend/Dockerfile` are intentionally self-contained.
 
 ## Runtime variables
 
-Set these in Koyeb. Never commit their real values:
+Set the following in Koyeb. Do not put real values in Git:
 
-- `DATABASE_URL`
+- `DATABASE_URL` — PostgreSQL connection string using the `asyncpg` SQLAlchemy driver and SSL.
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
-- `ALLOWED_ORIGINS`
-- `AUTO_CREATE_DB=false`
-- `MAX_UPLOAD_BYTES=104857600`
+- `ALLOWED_ORIGINS` — comma-separated browser origins.
+- `AUTO_CREATE_DB`
+- `MAX_UPLOAD_BYTES`
 
-The backend must use the PostgreSQL provider's SSL connection string in production.
+For the first deployment against an empty PostgreSQL database, temporarily set `AUTO_CREATE_DB=true` so SQLAlchemy creates the current schema. Once migrations are introduced, set it back to `false`.
 
-## After deployment
+## Endpoints
 
-1. Open the Koyeb service URL.
-2. Confirm `/` returns the FREEB API health response.
-3. Confirm `/v1/health` responds successfully.
-4. Record the real HTTPS URL ending in `.koyeb.app`.
-5. Use that URL for the Android API configuration.
-6. Rebuild FREEB.
-7. Test two separate phones: authentication, profile/search, messaging, WebSocket events, media, notifications, and call signaling.
+- `GET /` — service liveness and endpoint metadata.
+- `GET /v1/health` — dependency status.
+- `GET /v1/health/ready` — PostgreSQL readiness probe.
+- `WS /v1/ws/{conversation_id}` — authenticated conversation events.
+- `WS /v1/ws/calls/{call_id}` — authenticated WebRTC signaling.
 
-Do not put a fake backend URL in the Android application.
+The WebSocket layer accepts a Firebase ID token through either an `Authorization: Bearer ...` header or the `token` query parameter. Browser clients normally use the query-parameter form because the standard browser WebSocket API does not expose arbitrary request headers.
 
-## Important
+## Database
 
-Koyeb itself is not a PostgreSQL replacement for a production messaging database. Keep PostgreSQL as the source of truth and use Koyeb for the FastAPI service.
+PostgreSQL remains FREEB's source of truth. Do not use Koyeb's limited database offering as the primary messaging database.
+
+The application uses a conservative async SQLAlchemy pool (2 connections, no overflow) so a small PostgreSQL plan is not flooded with idle connections.
+
+## Important Koyeb behavior
+
+Koyeb Free Instances scale to zero after one hour without traffic. An active WebSocket connection counts as held traffic, but users can still experience a cold start when the service has been idle. Design Android/Web clients to reconnect and retry safely.
+
+The current WebSocket connection manager is in-process memory. Keep the first Koyeb service at a single instance. A future multi-instance deployment should replace that manager with a shared broker such as Redis/Valkey.
+
+## Deployment checklist
+
+1. Create the Koyeb Web Service from the FREEB GitHub repository.
+2. Set the work directory to `backend`.
+3. Configure port `8080` and readiness check `/v1/health/ready`.
+4. Add PostgreSQL, Firebase Admin and Cloudinary environment variables.
+5. Deploy and open the generated `.koyeb.app` HTTPS URL.
+6. Verify `/` and `/v1/health`.
+7. Put that real URL into the Android/web API configuration.
+8. Test authentication, conversations, WebSocket events, media, FCM notifications, and call signaling on two devices.
+
+Never hard-code a fake Koyeb URL into FREEB.

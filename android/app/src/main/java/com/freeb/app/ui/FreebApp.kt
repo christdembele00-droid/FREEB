@@ -22,7 +22,7 @@ import com.freeb.app.ui.components.FreebBottomBar
 import com.freeb.app.ui.components.IncomingCallCard
 import com.freeb.app.ui.screens.CameraScreen
 import com.freeb.app.ui.screens.MediaEditorScreen
-import com.freeb.app.ui.screens.ProfileScreen
+import com.freeb.app.ui.screens.RealProfileScreen
 import com.freeb.app.ui.screens.RealChatDetailScreen
 import com.freeb.app.ui.screens.RealChatListScreen
 import com.freeb.app.ui.screens.Screen
@@ -176,7 +176,7 @@ fun FreebApp(
                 Screen.DISCOVER -> com.freeb.app.ui.screens.DiscoverScreen {
                     overlay = OverlayPage.STORY_VIEWER
                 }
-                Screen.PROFILE -> ProfileScreen { overlay = OverlayPage.SETTINGS }
+                Screen.PROFILE -> RealProfileScreen { overlay = OverlayPage.SETTINGS }
             }
         }
 

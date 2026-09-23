@@ -1,4 +1,8 @@
 name: FREEB Deploy Cloud Run
+concurrency:
+  group: freeb-deploy-cloud-run.yml
+  cancel-in-progress: true
+
 
 on:
   workflow_dispatch:

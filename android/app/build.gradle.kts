@@ -19,7 +19,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
-        buildConfigField("String", "FREEB_API_URL", "\"http://10.0.2.2:8080\"")
+        buildConfigField("String", "FREEB_API_URL", "\"${providers.gradleProperty("freebApiUrl").orNull ?: "http://10.0.2.2:8080"}\"")
     }
 
     externalNativeBuild {

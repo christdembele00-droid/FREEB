@@ -67,7 +67,7 @@ function Landing({readyLabel,onLogin}:{readyLabel:string;onLogin:()=>void}){
   return <main className="landing">
     <section className="landing-card">
       <div className="landing-copy">
-        <div className="brand-lockup"><div className="brand-mark">FB</div><div className="brand-text"><strong>FREEB</strong><span>messaging · media · people</span></div></div>
+        <div className="brand-lockup"><img src="/freeb-logo.svg" alt="FREEB" style={{width:180,height:"auto"}} /></div>
         <div style={{marginTop:44}} className="eyebrow">PRIVATE SOCIAL SPACE</div>
         <h1>Talk. Share.<br/>Stay close.</h1>
         <p>Une interface pensée comme un vrai produit mobile : conversations rapides, présence en ligne et expérience visuelle fluide.</p>
@@ -78,15 +78,7 @@ function Landing({readyLabel,onLogin}:{readyLabel:string;onLogin:()=>void}){
         <div className="landing-note">Tes données applicatives passent par le backend FREEB. Firebase gère l'identité et Google Sign-In.</div>
       </div>
       <div className="landing-visual" aria-hidden="true">
-        <div className="orb"></div>
-        <div className="phone-stage">
-          <div className="phone-screen">
-            <div className="fake-head"><div className="fake-lines"><i></i><i></i></div><div className="fake-avatar"></div></div>
-            <div className="fake-list">
-              {names.map((name,index)=><div className="fake-chat" key={name}><span>{initials(name)}</span><div></div>{index<3&&<em/>}</div>)}
-            </div>
-          </div>
-        </div>
+        <img className="freeb-hero-art" src="/freeb-hero.svg" alt="" />
       </div>
     </section>
   </main>;
@@ -164,7 +156,7 @@ function App(){
 
   return <main className="shell">
     <header className="topbar">
-      <div className="brand-lockup"><div className="brand-mark">FB</div><div className="brand-text"><strong>FREEB</strong><span>social space</span></div></div>
+      <div className="brand-lockup"><img src="/freeb-logo.svg" alt="FREEB" style={{width:156,height:"auto"}} /></div>
       <div className="top-actions"><span className={health?.status==="ok" ? "status-pill online" : "status-pill"}>{readyLabel}</span><button className="btn" onClick={()=>void loadAccount()}>Rafraîchir</button><button className="btn icon" onClick={()=>void signOut(auth)} title="Déconnexion">↗</button></div>
     </header>
 

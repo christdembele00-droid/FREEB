@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -263,7 +264,7 @@ fun StoryViewerScreen(onBack: () -> Unit = {}) {
                 Modifier.fillMaxWidth().padding(horizontal = Adaptive.safeContentPadding(scale), vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                repeat(5) { Box(Modifier.weight(1f).size(height = 3.dp).background(Color.White.copy(if (it == 0) 1f else .25f), RoundedCornerShape(3.dp))) }
+                repeat(5) { Box(Modifier.weight(1f).height(3.dp).background(Color.White.copy(if (it == 0) 1f else .25f), RoundedCornerShape(3.dp))) }
             }
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = Adaptive.safeContentPadding(scale), vertical = 32.dp),

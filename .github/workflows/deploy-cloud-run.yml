@@ -1,17 +1,7 @@
 name: FREEB Deploy Cloud Run
-concurrency:
-  group: freeb-deploy-cloud-run.yml
-  cancel-in-progress: true
-
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - "deploy/**"
-      - ".github/workflows/deploy-cloud-run.yml"
 
 permissions:
   contents: read
@@ -23,18 +13,44 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - id: auth
+      - name: Check deployment configuration
+        id: config
+        env:
+          WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.GCP_REGION }}
+          SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+        run: |
+          missing=0
+          for name in WIF_PROVIDER SERVICE_ACCOUNT PROJECT_ID REGION SERVICE; do
+            if [ -z "${!name}" ]; then
+              echo "::warning::Missing GitHub secret for $name; Cloud Run deployment will be skipped."
+              missing=1
+            fi
+          done
+          echo "ready=$((1-missing))" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        if: steps.config.outputs.ready == '1'
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - uses: google-github-actions/setup-gcloud@v3
+      - name: Set up gcloud
+        if: steps.config.outputs.ready == '1'
+        uses: google-github-actions/setup-gcloud@v3
 
-      - name: Deploy
+      - name: Deploy backend to Cloud Run
+        if: steps.config.outputs.ready == '1'
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           REGION: ${{ secrets.GCP_REGION }}
           SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
         run: |
           gcloud run deploy "$SERVICE"             --source backend             --project "$PROJECT_ID"             --region "$REGION"             --platform managed             --allow-unauthenticated
+
+      - name: Deployment status
+        if: steps.config.outputs.ready != '1'
+        run: echo "Cloud Run deployment skipped until GitHub Google Cloud secrets are configured."

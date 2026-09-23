@@ -57,6 +57,8 @@ import com.freeb.app.NativeBridge
 import com.freeb.app.media.CaptureManager
 import com.freeb.app.media.CapturedMedia
 import com.freeb.app.media.MediaKind
+import com.freeb.app.media.MediaUploadManager
+import com.freeb.app.network.FreebApi
 import com.freeb.app.ui.Adaptive
 import com.freeb.app.ui.components.FreebIconButton
 
@@ -80,6 +82,7 @@ fun CameraScreen(
     var recording by remember { mutableStateOf(false) }
     var activeRecording by remember { mutableStateOf<androidx.camera.video.Recording?>(null) }
     val captureManager = remember(context) { CaptureManager(context) }
+    val uploadManager = remember(context) { MediaUploadManager(FreebApi(com.freeb.app.BuildConfig.FREEB_API_URL)) }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
         val scale = Adaptive.uiScale(maxWidth, maxHeight)
@@ -148,7 +151,14 @@ fun CameraScreen(
                                     return@detectTapGestures
                                 }
                                 captureManager.capturePhoto(current.imageCapture) { result ->
-                                    result.onSuccess { onOpenEditor() }
+                                    result.onSuccess { file ->
+                                        uploadManager.upload(
+                                            com.freeb.app.media.CapturedMedia(file, MediaKind.IMAGE, "image/jpeg"),
+                                            "freeb/dev/camera",
+                                            onSuccess = { onOpenEditor() },
+                                            onError = { onOpenEditor() }
+                                        )
+                                    }
                                 }
                             },
                             onLongPress = {
@@ -161,7 +171,14 @@ fun CameraScreen(
                                         onFinalized = {
                                             recording = false
                                             activeRecording = null
-                                            it.onSuccess { onOpenEditor() }
+                                            it.onSuccess { file ->
+                                                uploadManager.upload(
+                                                    com.freeb.app.media.CapturedMedia(file, MediaKind.VIDEO, "video/mp4"),
+                                                    "freeb/dev/camera",
+                                                    onSuccess = { onOpenEditor() },
+                                                    onError = { onOpenEditor() }
+                                                )
+                                            }
                                         }
                                     )
                                 } else {

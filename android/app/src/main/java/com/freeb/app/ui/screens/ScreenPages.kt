@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ChatBubbleOutline
@@ -63,7 +62,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.freeb.app.ui.Adaptive
 import com.freeb.app.ui.components.FreebIconButton
-import kotlin.math.max
 
 private val Accent = Color(0xFFFFD54A)
 private val Panel = Color(0xFF111111)
@@ -356,7 +354,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
 }
 
 @Composable
-private fun ResponsivePage(content: @Composable BoxWithConstraintsScope.(Float) -> Unit) {
+private fun ResponsivePage(content: @Composable (Float) -> Unit) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
         val scale = Adaptive.uiScale(maxWidth, maxHeight)
         content(scale)
@@ -364,7 +362,7 @@ private fun ResponsivePage(content: @Composable BoxWithConstraintsScope.(Float) 
 }
 
 @Composable
-private fun HomeScaffold(content: @Composable BoxWithConstraintsScope.(Float) -> Unit) {
+private fun HomeScaffold(content: @Composable (Float) -> Unit) {
     ResponsivePage(content)
 }
 

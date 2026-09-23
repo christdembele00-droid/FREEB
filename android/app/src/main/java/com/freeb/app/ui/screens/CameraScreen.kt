@@ -1,9 +1,15 @@
 package com.freeb.app.ui.screens
 
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
+import androidx.camera.video.VideoCapture
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -39,16 +45,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.freeb.app.NativeBridge
+import com.freeb.app.media.CaptureManager
+import com.freeb.app.media.CapturedMedia
+import com.freeb.app.media.MediaKind
 import com.freeb.app.ui.Adaptive
 import com.freeb.app.ui.components.FreebIconButton
+
+private data class CameraSession(
+    val camera: Camera,
+    val imageCapture: ImageCapture,
+    val videoCapture: VideoCapture<Recorder>
+)
 
 @Composable
 fun CameraScreen(
@@ -56,10 +72,14 @@ fun CameraScreen(
     requestCameraPermission: () -> Unit,
     onOpenEditor: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var frontCamera by remember { mutableStateOf(false) }
     var flashOn by remember { mutableStateOf(false) }
     var soundOn by remember { mutableStateOf(true) }
+    var session by remember { mutableStateOf<CameraSession?>(null) }
     var recording by remember { mutableStateOf(false) }
+    var activeRecording by remember { mutableStateOf<androidx.camera.video.Recording?>(null) }
+    val captureManager = remember(context) { CaptureManager(context) }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
         val scale = Adaptive.uiScale(maxWidth, maxHeight)
@@ -67,14 +87,13 @@ fun CameraScreen(
         CameraPreview(
             modifier = Modifier.fillMaxSize(),
             enabled = cameraPermissionGranted,
-            frontCamera = frontCamera
+            frontCamera = frontCamera,
+            flashOn = flashOn,
+            onSessionReady = { session = it }
         )
 
         if (!cameraPermissionGranted) {
-            PermissionOverlay(
-                scale = scale,
-                onRequest = requestCameraPermission
-            )
+            PermissionOverlay(scale, requestCameraPermission)
         } else {
             Row(
                 Modifier.fillMaxWidth().statusBarsPadding()
@@ -82,11 +101,7 @@ fun CameraScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FreebIconButton(
-                    Icons.Filled.PersonOutline,
-                    Adaptive.adaptiveIcon(scale),
-                    {}
-                )
+                FreebIconButton(Icons.Filled.PersonOutline, Adaptive.adaptiveIcon(scale), {})
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FreebIconButton(
                         if (flashOn) Icons.Filled.FlashOn else Icons.Filled.FlashOff,
@@ -100,17 +115,13 @@ fun CameraScreen(
             }
 
             Column(
-                Modifier.align(Alignment.CenterEnd)
-                    .padding(end = Adaptive.safeContentPadding(scale))
-                    .navigationBarsPadding(),
+                Modifier.align(Alignment.CenterEnd).padding(end = Adaptive.safeContentPadding(scale)).navigationBarsPadding(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FreebIconButton(
-                    Icons.Filled.FlipCameraAndroid,
-                    Adaptive.adaptiveIcon(scale, true),
-                    { frontCamera = !frontCamera }
-                )
+                FreebIconButton(Icons.Filled.FlipCameraAndroid, Adaptive.adaptiveIcon(scale, true), {
+                    if (activeRecording == null) frontCamera = !frontCamera
+                })
                 FreebIconButton(
                     if (soundOn) Icons.Filled.Mic else Icons.Filled.MicOff,
                     Adaptive.adaptiveIcon(scale, true),
@@ -119,7 +130,6 @@ fun CameraScreen(
                 )
                 FreebIconButton(Icons.Filled.AutoAwesome, Adaptive.adaptiveIcon(scale, true), {})
                 FreebIconButton(Icons.Filled.Image, Adaptive.adaptiveIcon(scale, true), onOpenEditor)
-                FreebIconButton(Icons.Filled.CameraAlt, Adaptive.adaptiveIcon(scale, true), {})
             }
 
             Box(
@@ -127,22 +137,58 @@ fun CameraScreen(
                     .padding(bottom = 102.dp)
                     .size(84.dp)
                     .background(Color.White, CircleShape)
-                    .pointerInput(recording) {
+                    .pointerInput(session, recording, soundOn) {
                         detectTapGestures(
-                            onTap = { recording = false },
-                            onLongPress = { recording = !recording }
+                            onTap = {
+                                val current = session ?: return@detectTapGestures
+                                if (activeRecording != null) {
+                                    activeRecording?.stop()
+                                    activeRecording = null
+                                    recording = false
+                                    return@detectTapGestures
+                                }
+                                captureManager.capturePhoto(current.imageCapture) { result ->
+                                    result.onSuccess { onOpenEditor() }
+                                }
+                            },
+                            onLongPress = {
+                                val current = session ?: return@detectTapGestures
+                                if (activeRecording == null) {
+                                    activeRecording = captureManager.startVideo(
+                                        current.videoCapture,
+                                        audioEnabled = soundOn,
+                                        onStarted = { recording = true },
+                                        onFinalized = {
+                                            recording = false
+                                            activeRecording = null
+                                            it.onSuccess { onOpenEditor() }
+                                        }
+                                    )
+                                } else {
+                                    activeRecording?.stop()
+                                    activeRecording = null
+                                    recording = false
+                                }
+                            }
                         )
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     Modifier.size(if (recording) 48.dp else 66.dp)
-                        .background(
-                            if (recording) Color.Black else Color.Black.copy(.98f),
-                            CircleShape
-                        )
+                        .background(Color.Black, CircleShape)
                 )
             }
+
+            Box(
+                Modifier.align(Alignment.BottomStart)
+                    .padding(start = Adaptive.safeContentPadding(scale), bottom = 112.dp)
+                    .size(18.dp)
+                    .background(
+                        if (NativeBridge.vulkanAvailable()) Color.White else Color.White.copy(.28f),
+                        CircleShape
+                    )
+            )
         }
     }
 }
@@ -151,7 +197,9 @@ fun CameraScreen(
 private fun CameraPreview(
     modifier: Modifier,
     enabled: Boolean,
-    frontCamera: Boolean
+    frontCamera: Boolean,
+    flashOn: Boolean,
+    onSessionReady: (CameraSession) -> Unit
 ) {
     if (!enabled) return
 
@@ -168,17 +216,35 @@ private fun CameraPreview(
 
     AndroidView(factory = { previewView }, modifier = modifier)
 
-    DisposableEffect(providerFuture, lifecycleOwner) {
+    DisposableEffect(providerFuture, lifecycleOwner, lensFacing, flashOn) {
+        val executor = ContextCompat.getMainExecutor(context)
         val listener = Runnable {
             val provider = providerFuture.get()
             val preview = Preview.Builder().build().also { it.surfaceProvider = previewView.surfaceProvider }
+            val imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .build()
+                .also { it.flashMode = if (flashOn) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF }
+
+            val recorder = Recorder.Builder()
+                .setQualitySelector(QualitySelector.from(Quality.HD))
+                .build()
+            val videoCapture = VideoCapture.withOutput(recorder)
             val selector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+
             runCatching {
                 provider.unbindAll()
-                provider.bindToLifecycle(lifecycleOwner, selector, preview)
+                val camera = provider.bindToLifecycle(
+                    lifecycleOwner,
+                    selector,
+                    preview,
+                    imageCapture,
+                    videoCapture
+                )
+                onSessionReady(CameraSession(camera, imageCapture, videoCapture))
             }
         }
-        providerFuture.addListener(listener, ContextCompat.getMainExecutor(context))
+        providerFuture.addListener(listener, executor)
         onDispose {
             runCatching { providerFuture.get().unbindAll() }
         }
@@ -189,19 +255,12 @@ private fun CameraPreview(
 private fun PermissionOverlay(scale: Float, onRequest: () -> Unit) {
     Box(
         Modifier.fillMaxSize()
-            .background(
-                Brush.radialGradient(
-                    listOf(Color(0xFF252525), Color.Black)
-                )
-            )
-            .pointerInput(Unit) {
-                detectTapGestures { onRequest() }
-            },
+            .background(Brush.radialGradient(listOf(Color(0xFF252525), Color.Black)))
+            .pointerInput(Unit) { detectTapGestures { onRequest() } },
         contentAlignment = Alignment.Center
     ) {
         Box(
-            Modifier.size(104.dp)
-                .background(Color.White.copy(.10f), CircleShape),
+            Modifier.size(104.dp).background(Color.White.copy(.10f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(

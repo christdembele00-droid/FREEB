@@ -108,7 +108,6 @@ class FreebWebRtcEngine(
             override fun onRenegotiationNeeded() = Unit
             override fun onAddTrack(receiver: org.webrtc.RtpReceiver?, mediaStreams: Array<out org.webrtc.MediaStream>?) = Unit
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) = Unit
-            override fun onIceConnectionChangeReceiving(receiving: Boolean) = Unit
             override fun onStandardizedIceConnectionChange(newState: PeerConnection.IceConnectionState?) = Unit
         }
 

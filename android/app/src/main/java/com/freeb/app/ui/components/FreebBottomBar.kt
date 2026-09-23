@@ -7,9 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Explore
@@ -24,6 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.freeb.app.ui.Adaptive
 
+private val BarColor = Color(0xE611161D)
+private val Accent = Color(0xFF67E8F9)
+private val Muted = Color(0xFF708091)
+
 @Composable
 fun FreebBottomBar(selectedIndex: Int, onSelect: (Int) -> Unit, scale: Float) {
     Box(
@@ -36,16 +41,16 @@ fun FreebBottomBar(selectedIndex: Int, onSelect: (Int) -> Unit, scale: Float) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(Color(0xD9070707), CircleShape)
-                .padding(horizontal = 6.dp, vertical = 7.dp),
+                .background(BarColor, RoundedCornerShape(22.dp))
+                .padding(horizontal = 7.dp, vertical = 7.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            item(Icons.Filled.ChatBubbleOutline, 0, selectedIndex, onSelect, scale)
-            item(Icons.Filled.StarBorder, 1, selectedIndex, onSelect, scale)
-            item(Icons.Filled.PhotoCamera, 2, selectedIndex, onSelect, scale, center = true)
-            item(Icons.Filled.Explore, 3, selectedIndex, onSelect, scale)
-            item(Icons.Filled.PersonOutline, 4, selectedIndex, onSelect, scale)
+            item(Icons.Filled.ChatBubbleOutline, 0, selectedIndex, onSelect, scale, "messages")
+            item(Icons.Filled.StarBorder, 1, selectedIndex, onSelect, scale, "stories")
+            item(Icons.Filled.PhotoCamera, 2, selectedIndex, onSelect, scale, "camera", center = true)
+            item(Icons.Filled.Explore, 3, selectedIndex, onSelect, scale, "discover")
+            item(Icons.Filled.PersonOutline, 4, selectedIndex, onSelect, scale, "profile")
         }
     }
 }
@@ -57,28 +62,33 @@ private fun item(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     scale: Float,
-    center: Boolean = false
+    contentDescription: String,
+    center: Boolean = false,
 ) {
+    val selected = index == selectedIndex
     Box(
         Modifier
-            .size(if (center) Adaptive.scaled(64.dp, scale) else Adaptive.scaled(48.dp, scale))
-            .background(if (center) Color.White else Color.Transparent, CircleShape)
-            .padding(if (center) 7.dp else 4.dp)
-            .background(if (center) Color.Black else if (index == selectedIndex) Color.White.copy(.12f) else Color.Transparent, CircleShape)
-            .then(Modifier),
-        contentAlignment = Alignment.Center
+            .size(if (center) Adaptive.scaled(62.dp, scale) else Adaptive.scaled(48.dp, scale))
+            .background(
+                when {
+                    center -> Accent
+                    selected -> Color.White.copy(alpha = .08f)
+                    else -> Color.Transparent
+                },
+                CircleShape,
+            )
+            .clickable { onSelect(index) },
+        contentAlignment = Alignment.Center,
     ) {
-        androidx.compose.foundation.layout.Box(
-            Modifier
-                .matchParentSize()
-                .background(Color.Transparent, CircleShape)
-                .clickable { onSelect(index) }
-        )
         Icon(
-            icon,
-            contentDescription = null,
-            tint = if (center) Color.White else Color.White.copy(if (index == selectedIndex) 1f else .72f),
-            modifier = Modifier.size(if (center) 28.dp else 22.dp)
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = when {
+                center -> Color(0xFF061017)
+                selected -> Color.White
+                else -> Muted
+            },
+            modifier = Modifier.size(if (center) 26.dp else 22.dp),
         )
     }
 }

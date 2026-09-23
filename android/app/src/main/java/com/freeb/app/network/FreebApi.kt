@@ -42,13 +42,13 @@ class FreebApi(
 
         val request = Request.Builder()
             .url(baseUrl.trimEnd('/') + "/v1/media/upload")
-            .header("Authorization", "Bearer \${idToken()}")
+            .header("Authorization", "Bearer ${idToken()}")
             .post(body)
             .build()
 
         client.newCall(request).execute().use { response ->
             val payload = response.body?.string().orEmpty()
-            if (!response.isSuccessful) error("Upload failed: HTTP \${response.code} \$payload")
+            if (!response.isSuccessful) error("Upload failed: HTTP ${response.code} $payload")
             return JSONObject(payload)
         }
     }
@@ -64,7 +64,7 @@ class FreebApi(
 
         val request = Request.Builder()
             .url(baseUrl.trimEnd('/') + "/v1/devices")
-            .header("Authorization", "Bearer \$idToken")
+            .header("Authorization", "Bearer $idToken")
             .post(body)
             .build()
 

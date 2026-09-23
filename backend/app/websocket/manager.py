@@ -18,4 +18,11 @@ class ConnectionManager:
         for websocket in list(self.connections.get(user_id, ())):
             await websocket.send_json(message)
 
+    async def broadcast(self, room: str, message: dict) -> None:
+        for websocket in list(self.connections.get(room, ())):
+            try:
+                await websocket.send_json(message)
+            except Exception:
+                self.disconnect(room, websocket)
+
 manager = ConnectionManager()

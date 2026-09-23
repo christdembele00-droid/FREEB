@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+sqlalchemy
+asyncpg
+alembic
+firebase-admin
+cloudinary
+httpx
+pytest

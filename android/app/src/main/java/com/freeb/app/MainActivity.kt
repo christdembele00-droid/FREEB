@@ -69,7 +69,8 @@ class MainActivity : ComponentActivity() {
                         permissionLauncher.launch(
                             arrayOf(
                                 Manifest.permission.CAMERA,
-                                Manifest.permission.RECORD_AUDIO
+                                Manifest.permission.RECORD_AUDIO,
+                                Manifest.permission.POST_NOTIFICATIONS
                             )
                         )
                     }

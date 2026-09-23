@@ -2,6 +2,8 @@ name: FREEB Android Build
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   build:
@@ -11,6 +13,14 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
       - uses: android-actions/setup-android@v3
-      - run: echo "Release AAB pipeline is enabled after Firebase registration and signing secrets are configured."
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - run: gradle :android:app:assembleDebug --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FREEB-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk

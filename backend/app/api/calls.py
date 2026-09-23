@@ -58,6 +58,32 @@ async def create_call(
     )
     return {"call_id": call.id, "kind": kind, "status": call.status}
 
+@router.get("/incoming")
+async def incoming_calls(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(CallSession)
+        .where(
+            CallSession.callee_id == user.id,
+            CallSession.status == "RINGING",
+            CallSession.expires_at > utc_now(),
+        )
+        .order_by(CallSession.created_at.desc())
+        .limit(10)
+    )
+    return [
+        {
+            "call_id": call.id,
+            "caller_id": call.caller_id,
+            "kind": call.kind,
+            "created_at": call.created_at,
+            "expires_at": call.expires_at,
+        }
+        for call in result.scalars()
+    ]
+
 @router.post("/{call_id}/answer")
 async def answer_call(
     call_id: str,

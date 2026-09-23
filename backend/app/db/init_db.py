@@ -24,5 +24,8 @@ from app.db.session import engine
 
 async def init_db() -> None:
     async with engine.begin() as connection:
-        await connection.execute(text("CREATE SCHEMA IF NOT EXISTS freeb"))
+        if Base.metadata.schema:
+            await connection.execute(
+                text(f"CREATE SCHEMA IF NOT EXISTS {Base.metadata.schema}")
+            )
         await connection.run_sync(Base.metadata.create_all)

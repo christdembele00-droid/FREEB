@@ -13,6 +13,7 @@ from app.api.devices import router as devices_router
 from app.api.health import router as health_router
 from app.api.media import router as media_router
 from app.api.stories import router as stories_router
+from app.api.search import router as search_router
 from app.api.users import router as users_router
 from app.api.ws import router as ws_router
 from app.core.config import settings
@@ -30,6 +31,7 @@ app.include_router(users_router, prefix="/v1")
 app.include_router(devices_router, prefix="/v1")
 app.include_router(media_router, prefix="/v1")
 app.include_router(stories_router, prefix="/v1")
+app.include_router(search_router, prefix="/v1")
 app.include_router(chat_router, prefix="/v1")
 app.include_router(calls_router, prefix="/v1")
 app.include_router(call_ws_router, prefix="/v1")

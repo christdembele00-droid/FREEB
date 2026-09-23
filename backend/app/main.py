@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.chat import router as chat_router
@@ -7,8 +9,16 @@ from app.api.media import router as media_router
 from app.api.stories import router as stories_router
 from app.api.users import router as users_router
 from app.api.ws import router as ws_router
+from app.core.config import settings
+from app.db.init_db import init_db
 
-app = FastAPI(title="FREEB API", version="0.2.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.auto_create_db:
+        await init_db()
+    yield
+
+app = FastAPI(title="FREEB API", version="0.3.0", lifespan=lifespan)
 app.include_router(health_router, prefix="/v1")
 app.include_router(users_router, prefix="/v1")
 app.include_router(devices_router, prefix="/v1")

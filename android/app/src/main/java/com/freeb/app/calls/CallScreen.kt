@@ -44,6 +44,7 @@ fun CallScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val engine = remember { FreebWebRtcEngine(context, eglBase) }
     val signaling = remember { CallSignalingClient(BuildConfig.FREEB_API_URL) }
+    val api = remember { com.freeb.app.network.FreebApi(BuildConfig.FREEB_API_URL) }
     var muted by remember { mutableStateOf(false) }
     var remoteTrack by remember { mutableStateOf<VideoTrack?>(null) }
 
@@ -56,6 +57,9 @@ fun CallScreen(
         if (token != null) {
             signaling.connect(
                 callId = callId,
+                onConnected = {
+                    if (initiator) engine.createOffer(signaling::sendOffer)
+                },
                 onEvent = { event, payload ->
                     when (event) {
                         "OFFER" -> {
@@ -70,12 +74,14 @@ fun CallScreen(
                                 payload.getString("candidate")
                             )
                         )
-                        "CALL_ENDED" -> onEnd()
+                        "CALL_ENDED", "CALL_REJECTED" -> onEnd()
                     }
                 }
             )
+            if (!initiator) {
+                Thread { runCatching { api.answerCall(callId) } }.start()
+            }
         }
-        if (initiator) engine.createOffer(signaling::sendOffer)
 
         onDispose {
             signaling.hangup()

@@ -11,38 +11,29 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.File
 
-class FreebApi(
-    private val baseUrl: String,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val client: OkHttpClient = OkHttpClient.Builder().build()
-) {
-    fun uploadMedia(file: File, kind: String, folder: String): JSONObject {
+class FreebApi(private val baseUrl: String, private val auth: FirebaseAuth = FirebaseAuth.getInstance(), private val client: OkHttpClient = OkHttpClient()) {
+    private fun idToken(): String {
         val user = auth.currentUser ?: error("Authentication required")
-        val token = Tasks.await(user.getIdToken(false)).token ?: error("Missing Firebase token")
+        return Tasks.await(user.getIdToken(false)).token ?: error("Missing Firebase token")
+    }
 
+    fun uploadMedia(file: File, kind: String, folder: String): JSONObject {
         val mime = when (kind) {
             "IMAGE" -> "image/jpeg"
             "VIDEO" -> "video/mp4"
             "AUDIO" -> "audio/mp4"
             else -> "application/octet-stream"
         }.toMediaType()
-
-        val body = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
+        val body = MultipartBody.Builder().setType(MultipartBody.FORM)
             .addFormDataPart("kind", kind)
             .addFormDataPart("folder", folder)
             .addFormDataPart("file", file.name, file.asRequestBody(mime))
             .build()
-
-        val request = Request.Builder()
-            .url(baseUrl.trimEnd('/') + "/v1/media/upload")
-            .header("Authorization", "Bearer $token")
-            .post(body)
-            .build()
-
+        val request = Request.Builder().url(baseUrl.trimEnd('/') + "/v1/media/upload")
+            .header("Authorization", "Bearer \${idToken()}").post(body).build()
         client.newCall(request).execute().use { response ->
             val payload = response.body?.string().orEmpty()
-            if (!response.isSuccessful) error("Upload failed: HTTP ${response.code} $payload")
+            if (!response.isSuccessful) error("Upload failed: HTTP \${response.code} \$payload")
             return JSONObject(payload)
         }
     }
@@ -50,15 +41,10 @@ class FreebApi(
     fun registerDevice(token: String, platform: String = "android") {
         val user = auth.currentUser ?: return
         val idToken = Tasks.await(user.getIdToken(false)).token ?: return
-        val body = JSONObject().apply {
-            put("token", token)
-            put("platform", platform)
-        }.toString().toRequestBody("application/json".toMediaType())
-        val request = Request.Builder()
-            .url(baseUrl.trimEnd('/') + "/v1/devices")
-            .header("Authorization", "Bearer $idToken")
-            .post(body)
-            .build()
-        client.newCall(request).execute().close()
+        val body = JSONObject().apply { put("token", token); put("platform", platform) }
+            .toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url(baseUrl.trimEnd('/') + "/v1/devices")
+            .header("Authorization", "Bearer \${idToken}").post(body).build()
+        client.newCall(request).execute().use { }
     }
 }
